@@ -3,12 +3,13 @@ import json
 import requests
 import folium
 from geopy import distance
-from flask import Flask
+from flask import Flask, render_template_string
 from dotenv import load_dotenv
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 load_dotenv()
+
 
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
@@ -44,7 +45,7 @@ def create_map(coords_user, coffee_list):
             icon=folium.Icon(color='red')
         ).add_to(map_)
 
-    map_.save('coffee_map.html')
+    return map_ 
 
 
 def main():
@@ -55,7 +56,6 @@ def main():
     apikey = os.getenv('API_KEY')
     location = input('Где вы находитесь? ')
     coords_user = fetch_coordinates(apikey, location)
-    print(f'Ваши координаты: {coords_user}')
 
     coffee_list = []
 
@@ -75,11 +75,22 @@ def main():
         coffee_list.append(coffee_info)
 
     sorted_coffee = sorted(coffee_list, key=lambda x: x['distance'])[:5]
+    map_ = create_map(coords_user, sorted_coffee)
+    map_html = map_._repr_html_()
 
-    create_map(coords_user, sorted_coffee)
+    return render_template_string("""
+        <html>
+            <head>
+                <title>Карта кофеен</title>
+            </head>
+            <body>
+                {{ map_html|safe }}
+            </body>
+        </html>
+    """, map_html=map_html)
 
-    print("Карта с кофейнями сохранена")
 
+app.add_url_rule('/', 'render_map', main)
 
 if __name__ == '__main__':
-    main()
+    app.run('0.0.0.0', debug=True)

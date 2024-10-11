@@ -7,10 +7,6 @@ from flask import Flask, render_template_string
 from dotenv import load_dotenv
 
 
-app = Flask(__name__)
-load_dotenv()
-
-
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
     response = requests.get(base_url, params={
@@ -49,6 +45,7 @@ def create_map(coords_user, coffee_list):
 
 
 def main():
+    load_dotenv()
     with open("coffee.json", "r", encoding="CP1251") as my_file:
         file_contents = my_file.read()
     format_contents = json.loads(file_contents)
@@ -90,7 +87,7 @@ def main():
     """, map_html=map_html)
 
 
-app.add_url_rule('/', 'render_map', main)
-
 if __name__ == '__main__':
+    app = Flask(__name__)
+    app.add_url_rule('/', 'render_map', main)
     app.run('0.0.0.0', debug=True)

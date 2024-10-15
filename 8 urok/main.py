@@ -44,7 +44,7 @@ def create_map(coords_user, coffee_list):
     return map_ 
 
 
-def main():
+def render_map():
     load_dotenv()
     with open("coffee.json", "r", encoding="CP1251") as my_file:
         file_contents = my_file.read()
@@ -87,7 +87,15 @@ def main():
     """, map_html=map_html)
 
 
-if __name__ == '__main__':
+def main():
     app = Flask(__name__)
-    app.add_url_rule('/', 'render_map', main)
+
+    @app.route('/')
+    def map_route():
+        return render_map()
+    
     app.run('0.0.0.0', debug=True)
+
+
+if __name__ == '__main__':
+    main()
